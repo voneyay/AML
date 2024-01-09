@@ -17,17 +17,19 @@ from sklearn.metrics.pairwise import cosine_similarity
 
 # Global variables
 # ----------------
-source_file = '../docs/source-tool7.xlsm'
-pd_path = path.abspath(path.join(path.dirname(__file__), source_file))
+source_file = 'source-tool7.xlsm'
+# Simple reference local file for version 1
+pd_path = source_file # path.abspath(path.join(path.dirname(__file__), source_file))
 
 # 20240108, 0105 討論中，BU表示 工具七 中的 "原始資料" 有謬誤，希望從PDF裡取得原始資料。
 # 所以這一區域測試從 PDF 裏面取得正確的 原始資料。
 # ------------
 import tabula
 # 這個檔案就是 "許多備註.pdf" or "客戶備註很多.pdf"
-source2_file = '../docs/source-tool7.pdf'
+source2_file = 'source-tool7.pdf'
 # 使用Evon的方式取出所有的page
-pd2_path = path.abspath(path.join(path.dirname(__file__), source2_file))
+# Simple reference local file for version 1
+pd2_path = source2_file # path.abspath(path.join(path.dirname(__file__), source2_file))
 src2_dfs = tabula.read_pdf(pd2_path, area=[120, 5, 800, 1200], pages="all")
 
 # 這裡的 "支出" 與 "存入" 用 "Out" 以及 "In"取代，目的是跟工具七的欄位一致
@@ -66,37 +68,39 @@ for src_df in src2_dfs:
             col_name = headers[col]
 
             if col < 4: # before 4, only a wrong col_name '帳務日期 交易代號', but you can ignore it
-                refine_list.append(value_list[col])
+                refine_list.append(f'{value_list[col]}')
             if col == 4: # this comes a wrong col_name '交易分行 交易櫃員'
                 (col4_val, col5_val) = value_list[col].split(' ')
-                refine_list.append(col4_val)
-                refine_list.append(col5_val)
+                refine_list.append(f'{col4_val}')
+                refine_list.append(f'{col5_val}')
             if (col >= 5) and (col <= 9): # from '摘要' to '轉出入帳號'
                 # check this range
                 wlist = check_wrong_idx(wrong_idx, 5, 9)
                 if len(wlist) <= 0:
-                    refine_list.append(value_list[col])
+                    refine_list.append(f'{value_list[col]}')
                 else:
                     for w in wlist:
                         if col == w:
                             continue
                         else:
-                            refine_list.append(value_list[col])
-            if col >= 10:
+                            refine_list.append(f'{value_list[col]}')
+            if col == 10:
+                refine_list.append(f'{value_list[col]}')
+            if col >= 11:
                 # check this range
                 wlist = check_wrong_idx(wrong_idx, 10, len(value_list))
                 if len(wlist) <= 0:
-                    refine_list.append(value_list[col])
+                    refine_list.append(f'{value_list[col]}')
                 else:
                     for w in wlist:
                         if (col == w) and (col != should_ignore):
                             should_ignore = col + 1
-                            refine_list.append(value_list[col])
+                            refine_list.append(f'{value_list[col]}')
                         elif should_ignore > 0:
                             should_ignore = 0
                             continue
                         else:
-                            refine_list.append(value_list[col])
+                            refine_list.append(f'{value_list[col]}')
 
         src3_df.loc[len(src3_df.index)] = refine_list
 # -----------
@@ -117,6 +121,10 @@ if False:
     srcdata = pd.read_excel(pd_path, sheet_name=rawdata_sheet, skiprows=7)
     srcdata.columns = srcdata.columns.str.split('\\n').str[0]
 logger.debug(srcdata)
+
+rawdata_csv = 'rawdata-tool8.xlsx'
+with pd.ExcelWriter(rawdata_csv) as writer:
+    srcdata.to_excel(writer, sheet_name="Rawdata", index=False)
 
 # 這個是從 工具七 裡讀出 "Report_MachineManage" 頁
 rmdata = pd.read_excel(pd_path, sheet_name=atm_info_sheet, skiprows=-1)

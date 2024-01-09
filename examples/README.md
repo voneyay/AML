@@ -1,0 +1,1 @@
+pyinstaller poc_keyword_oriented.spec 

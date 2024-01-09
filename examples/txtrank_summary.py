@@ -5,9 +5,10 @@
 
 import sys
 from textrank4zh import TextRank4Keyword, TextRank4Sentence
+from utils import resource_path
 
 
-STOPWORDS = 'stop_words.txt'
+STOPWORDS = resource_path('stop_words.txt')
 
 
 class TextRankSummarization():
